@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
+	"os"
 )
 
 type Server struct {
@@ -69,7 +70,12 @@ func (s *Server) BroadcastStartSession(c context.Context, req *proto.StartSessio
 }
 
 func StartGRPCServer(rm *room.RoomManager, port string) {
-	lis, err := net.Listen("tcp", ":"+port)
+	envPort := os.Getenv("GRPC_PORT") // fallback port for railway deployment
+	if envPort == "" {
+		envPort = port
+	}
+
+	lis, err := net.Listen("tcp", ":"+envPort)
 	if err != nil {
 		panic(err)
 	}
