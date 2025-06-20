@@ -12,10 +12,16 @@ type Config struct {
 	GrpcPort string `yaml:"grpc_port"`
 }
 
-const _PATH = "./config.yml"
+const _FILE = "config.yml"
 
 func Load() (*Config, error) {
-	data, err := os.ReadFile(_PATH)
+	env := os.Getenv("ENV")
+	path := "./local/"
+	if env == "prd" {
+		path = "./prd/"
+	}
+
+	data, err := os.ReadFile(path + _FILE)
 	if err != nil {
 		log.Printf("read config file: %w", err)
 		return nil, err
@@ -30,6 +36,13 @@ func Load() (*Config, error) {
 	if appConfig == nil {
 		log.Printf("config nil")
 		return nil, errors.New("invalid config")
+	}
+
+	if env == "prd" {
+		port := os.Getenv("PORT") // fallback for railway deployment
+		if port == "" {
+			port = appConfig.Port
+		}
 	}
 
 	return appConfig, nil
