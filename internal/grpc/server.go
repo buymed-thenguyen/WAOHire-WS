@@ -1,0 +1,83 @@
+package grpc
+
+import (
+	"backend-ws/internal/room"
+	"backend-ws/proto"
+	"context"
+	"encoding/json"
+	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"net"
+)
+
+type Server struct {
+	proto.UnimplementedBroadcasterServer
+	rm *room.RoomManager
+}
+
+func NewServer(rm *room.RoomManager) *Server {
+	return &Server{rm: rm}
+}
+
+func (s *Server) BroadcastUserAnswered(c context.Context, req *proto.UserAnsweredRequest) (*proto.BroadcastResponse, error) {
+	msg := map[string]interface{}{
+		"event":        "user_answered",
+		"user_id":      req.UserId,
+		"session_code": req.SessionCode,
+	}
+	jsonData, _ := json.Marshal(msg)
+	s.rm.Broadcast(req.SessionCode, jsonData)
+	return &proto.BroadcastResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *Server) BroadcastUserJoined(c context.Context, req *proto.UserJoinedRequest) (*proto.BroadcastResponse, error) {
+	msg := map[string]interface{}{
+		"event": "user_joined",
+	}
+	jsonData, _ := json.Marshal(msg)
+	s.rm.Broadcast(req.SessionCode, jsonData)
+	return &proto.BroadcastResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *Server) BroadcastUserLeaved(c context.Context, req *proto.UserLeavedRequest) (*proto.BroadcastResponse, error) {
+	msg := map[string]interface{}{
+		"event": "user_leaved",
+	}
+	jsonData, _ := json.Marshal(msg)
+	s.rm.Broadcast(req.SessionCode, jsonData)
+	return &proto.BroadcastResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *Server) BroadcastStartSession(c context.Context, req *proto.StartSessionRequest) (*proto.BroadcastResponse, error) {
+	msg := map[string]interface{}{
+		"event":        "start_session",
+		"quiz_id":      req.QuizId,
+		"session_code": req.SessionCode,
+	}
+	jsonData, _ := json.Marshal(msg)
+	s.rm.Broadcast(req.SessionCode, jsonData)
+	return &proto.BroadcastResponse{
+		Success: true,
+	}, nil
+}
+
+func StartGRPCServer(rm *room.RoomManager, port string) {
+	lis, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		panic(err)
+	}
+	grpcServer := grpc.NewServer()
+	proto.RegisterBroadcasterServer(grpcServer, NewServer(rm))
+	reflection.Register(grpcServer)
+	fmt.Println("gRPC server started on :" + port)
+	if err := grpcServer.Serve(lis); err != nil {
+		panic(err)
+	}
+}
