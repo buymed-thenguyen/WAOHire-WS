@@ -31,7 +31,6 @@ func Run() {
 	if port == "" {
 		port = cfg.Port
 	}
-
 	if err = r.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
