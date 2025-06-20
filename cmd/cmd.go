@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"os"
 )
 
 func Run() {
@@ -25,6 +26,11 @@ func Run() {
 
 	r := gin.Default()
 	r.GET("/ws/:session_code", ws.HandleWS(rm))
+
+	port := os.Getenv("PORT") // fallback for railway deployment
+	if port == "" {
+		port = cfg.Port
+	}
 
 	if err = r.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
