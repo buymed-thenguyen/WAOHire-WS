@@ -16,9 +16,9 @@ const _FILE = "config.yml"
 
 func Load() (*Config, error) {
 	env := os.Getenv("ENV")
-	path := "./local/"
+	path := "./config/local/"
 	if env == "prd" {
-		path = "./prd/"
+		path = "./config/prd/"
 	}
 
 	data, err := os.ReadFile(path + _FILE)
