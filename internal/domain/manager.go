@@ -1,4 +1,4 @@
-package room
+package domain
 
 import (
 	"github.com/gorilla/websocket"
@@ -6,15 +6,18 @@ import (
 	"sync"
 )
 
+var rm *RoomManager
+
 type RoomManager struct {
 	rooms map[string]map[*websocket.Conn]bool
 	mu    sync.RWMutex
 }
 
 func NewRoomManager() *RoomManager {
-	return &RoomManager{
+	rm = &RoomManager{
 		rooms: make(map[string]map[*websocket.Conn]bool),
 	}
+	return rm
 }
 
 func (r *RoomManager) AddClient(sessionCode string, conn *websocket.Conn) {

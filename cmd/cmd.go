@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"backend-ws/config"
+	"backend-ws/internal/domain"
 	"backend-ws/internal/grpc"
-	"backend-ws/internal/room"
-	"backend-ws/internal/ws"
+	"backend-ws/internal/handler"
+	"backend-ws/utils/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -20,11 +21,25 @@ func Run() {
 	}
 	fmt.Println("✅ Config loaded")
 
-	rm := room.NewRoomManager()
+	// logger
+	logger.InitLogger(cfg.Logger.Path)
+	fmt.Println("✅ Initiated logger")
+
+	rm := domain.NewRoomManager()
+
+	// grpc
 	go grpc.StartGRPCServer(rm, cfg.GrpcPort)
 
 	r := gin.Default()
-	r.GET("/ws/:session_code", ws.HandleWS(rm))
+
+	// ws
+	r.GET("/ws/:session_code", handler.HandleWS(rm))
+
+	// http
+	r.POST("/ws/user-joined", handler.UserJoined)
+	r.POST("/ws/user-leaved", handler.UserLeaved)
+	r.POST("/ws/user-answered", handler.UserAnswered)
+	r.POST("/ws/start-session", handler.StartSession)
 
 	if err = r.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)

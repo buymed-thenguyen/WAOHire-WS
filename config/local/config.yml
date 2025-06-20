@@ -1,2 +1,5 @@
 port: 8081
 grpc_port: 50051
+
+logger:
+  path: logs/server.log

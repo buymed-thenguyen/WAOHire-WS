@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	"backend-ws/internal/room"
+	"backend-ws/internal/domain"
 	"backend-ws/proto"
 	"context"
 	"encoding/json"
@@ -14,10 +14,10 @@ import (
 
 type Server struct {
 	proto.UnimplementedBroadcasterServer
-	rm *room.RoomManager
+	rm *domain.RoomManager
 }
 
-func NewServer(rm *room.RoomManager) *Server {
+func NewServer(rm *domain.RoomManager) *Server {
 	return &Server{rm: rm}
 }
 
@@ -69,7 +69,7 @@ func (s *Server) BroadcastStartSession(c context.Context, req *proto.StartSessio
 	}, nil
 }
 
-func StartGRPCServer(rm *room.RoomManager, port string) {
+func StartGRPCServer(rm *domain.RoomManager, port string) {
 	envPort := os.Getenv("GRPC_PORT") // fallback port for railway deployment
 	if envPort == "" {
 		envPort = port

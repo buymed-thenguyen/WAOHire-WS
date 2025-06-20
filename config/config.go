@@ -8,8 +8,13 @@ import (
 )
 
 type Config struct {
-	Port     string `yaml:"port"`
-	GrpcPort string `yaml:"grpc_port"`
+	Port     string  `yaml:"port"`
+	GrpcPort string  `yaml:"grpc_port"`
+	Logger   *Logger `yaml:"logger"`
+}
+
+type Logger struct {
+	Path string `json:"path"`
 }
 
 const _FILE = "config.yml"
