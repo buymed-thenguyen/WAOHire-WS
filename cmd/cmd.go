@@ -7,7 +7,6 @@ import (
 	"backend-ws/internal/handler"
 	"backend-ws/utils/logger"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 )
 
@@ -30,17 +29,7 @@ func Run() {
 	// grpc
 	go grpc.StartGRPCServer(rm, cfg.GrpcPort)
 
-	r := gin.Default()
-
-	// ws
-	r.GET("/ws/:session_code", handler.HandleWS(rm))
-
-	// http
-	r.POST("/ws/user-joined", handler.UserJoined)
-	r.POST("/ws/user-leaved", handler.UserLeaved)
-	r.POST("/ws/user-answered", handler.UserAnswered)
-	r.POST("/ws/start-session", handler.StartSession)
-
+	r := handler.SetupRouter(rm)
 	if err = r.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
